@@ -1,0 +1,330 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Level {
+  N5
+  N4
+  N3
+  N2
+  N1
+}
+
+enum Kind {
+  KANJI
+  VOCABULARY
+  GRAMMAR
+  UNIT
+  LESSON
+  READING
+  LISTENING
+  EXAM
+}
+
+enum Publication {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Mastery {
+  SEEN
+  COMPLETED
+  REVIEWING
+  MASTERED
+}
+
+enum Rating {
+  AGAIN
+  HARD
+  GOOD
+  EASY
+}
+
+enum QuestionType {
+  CHOICE
+  TEXT
+  ORDER
+}
+
+model User {
+  id          String @id @default(cuid())
+  email       String @unique
+  password    String
+  name        String
+  avatar      String?
+  role        Role @default(USER)
+  active      Boolean @default(true)
+  level       Level @default(N5)
+  target      Level @default(N5)
+  goal        String @default("")
+  dailyMinutes Int @default(20)
+  preferences Kind[] @default([])
+  onboarded   Boolean @default(false)
+  timezone    String @default("Asia/Ho_Chi_Minh")
+  createdAt   DateTime @default(now())
+  sessions    Session[]
+  resets      PasswordReset[]
+  progress    Progress[]
+  activities  Activity[]
+  attempts    Attempt[]
+  decks       Deck[]
+  reviews     Review[]
+  notes       Note[]
+  imports     ImportJob[]
+}
+
+model Session {
+  id        String @id @default(cuid())
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String @unique
+  expiresAt DateTime
+  @@index([userId])
+}
+
+model PasswordReset {
+  tokenHash String @id
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  @@index([userId])
+}
+
+model Source {
+  id        String @id
+  name      String
+  url       String
+  license   String
+  notice    String
+  content   Content[]
+}
+
+model Content {
+  id          String @id @default(cuid())
+  kind        Kind
+  slug        String
+  title       String
+  level       Level
+  topic       String @default("")
+  summary     String @default("")
+  reading     String @default("")
+  hanViet     String @default("")
+  radical     String @default("")
+  strokes     Int?
+  partOfSpeech String @default("")
+  difficulty  Int @default(1)
+  order       Int @default(0)
+  searchText  String @default("")
+  status      Publication @default(DRAFT)
+  data        Json @default("{}")
+  sourceId    String?
+  source      Source? @relation(fields: [sourceId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  linksFrom   ContentLink[] @relation("LinkFrom")
+  linksTo     ContentLink[] @relation("LinkTo")
+  questions   ContentQuestion[]
+  knowledge   Question[]
+  progress    Progress[]
+  reviews     Review[]
+  notes       Note[]
+  decks       DeckCard[]
+  attempts    Attempt[]
+  examples    ContentExample[]
+  @@unique([kind, slug])
+  @@index([kind, status, level, title])
+  @@index([kind, level, status, order])
+  @@index([sourceId])
+}
+
+model ContentLink {
+  fromId String
+  toId   String
+  label  String
+  order  Int @default(0)
+  from   Content @relation("LinkFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to     Content @relation("LinkTo", fields: [toId], references: [id], onDelete: Cascade)
+  @@id([fromId, toId, label])
+  @@index([toId])
+}
+
+model Example {
+  id          String @id
+  japanese    String
+  reading     String @default("")
+  vietnamese  String @default("")
+  english     String @default("")
+  url         String @default("")
+  credit      String @default("")
+  entries     ContentExample[]
+}
+
+model ContentExample {
+  contentId String
+  exampleId String
+  order     Int @default(0)
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  example   Example @relation(fields: [exampleId], references: [id], onDelete: Cascade)
+  @@id([contentId, exampleId])
+  @@index([exampleId])
+}
+
+model Question {
+  id          String @id @default(cuid())
+  prompt      String
+  kind        Kind
+  level       Level
+  topic       String @default("")
+  type        QuestionType @default(CHOICE)
+  options     String[] @default([])
+  answers     String[]
+  explanation String
+  difficulty  Int @default(1)
+  status      Publication @default(DRAFT)
+  contentId   String?
+  content     Content? @relation(fields: [contentId], references: [id])
+  sets        ContentQuestion[]
+  @@index([status, level, kind, topic, type])
+}
+
+model ContentQuestion {
+  contentId  String
+  questionId String
+  order      Int @default(0)
+  content    Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@id([contentId, questionId])
+  @@index([questionId])
+}
+
+model Progress {
+  userId    String
+  contentId String
+  state     Mastery @default(SEEN)
+  updatedAt DateTime @updatedAt
+  completedAt DateTime?
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   Content @relation(fields: [contentId], references: [id])
+  @@id([userId, contentId])
+  @@index([userId, state, updatedAt])
+  @@index([contentId])
+}
+
+model Activity {
+  id        String @id
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      Kind
+  seconds   Int
+  createdAt DateTime @default(now())
+  @@index([userId, createdAt])
+}
+
+model Attempt {
+  id          String @id @default(cuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentId   String?
+  content     Content? @relation(fields: [contentId], references: [id])
+  title       String
+  level       Level?
+  startedAt   DateTime @default(now())
+  deadline    DateTime?
+  submittedAt DateTime?
+  correct     Int?
+  responses   Response[]
+  @@index([userId, submittedAt, startedAt])
+}
+
+model Response {
+  attemptId String
+  position  Int
+  attempt   Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId String
+  snapshot  Json
+  answer    String?
+  flagged   Boolean @default(false)
+  correct   Boolean?
+  @@id([attemptId, position])
+  @@index([questionId])
+}
+
+model Deck {
+  id        String @id @default(cuid())
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  cards     DeckCard[]
+  @@unique([userId, name])
+}
+
+model DeckCard {
+  deckId    String
+  contentId String
+  deck      Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  content   Content @relation(fields: [contentId], references: [id])
+  @@id([deckId, contentId])
+  @@index([contentId])
+}
+
+model Review {
+  userId      String
+  contentId   String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     Content @relation(fields: [contentId], references: [id])
+  dueAt       DateTime @default(now())
+  lastAt      DateTime?
+  interval    Int @default(0)
+  count       Int @default(0)
+  streak      Int @default(0)
+  lastRating  Rating?
+  history     ReviewHistory[]
+  @@id([userId, contentId])
+  @@index([userId, dueAt])
+}
+
+model ReviewHistory {
+  id        String @id
+  userId    String
+  contentId String
+  review    Review @relation(fields: [userId, contentId], references: [userId, contentId], onDelete: Cascade)
+  rating    Rating
+  createdAt DateTime @default(now())
+  dueAt     DateTime
+  @@index([userId, createdAt])
+  @@index([userId, contentId])
+}
+
+model Note {
+  userId    String
+  contentId String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   Content @relation(fields: [contentId], references: [id])
+  text      String @default("")
+  favorite  Boolean @default(false)
+  createdAt DateTime @default(now())
+  @@id([userId, contentId])
+  @@index([userId, createdAt])
+}
+
+model ImportJob {
+  id        String @id @default(cuid())
+  userId    String?
+  user      User? @relation(fields: [userId], references: [id])
+  label     String
+  report    Json
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+}
+

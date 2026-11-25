@@ -1,0 +1,54 @@
+name: Kiểm tra Nihongo Master
+on:
+  push:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: nihongo
+          POSTGRES_PASSWORD: nihongo_dev
+          POSTGRES_DB: nihongo
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://nihongo:nihongo_dev@127.0.0.1:55432/nihongo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate
+      - run: npm run db:migrate
+      - run: npm run db:seed
+      - run: npm run db:import
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Kiểm thử trình duyệt
+        run: |
+          npm run dev > /tmp/nihongo-dev.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4175/api/health && break; sleep 1; done
+          curl -fsS http://127.0.0.1:4175/api/health
+          npm run test:e2e
+      - name: Lưu log kiểm thử khi lỗi
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: kiem-thu
+          path: |
+            test-results
+            /tmp/nihongo-dev.log
+
