@@ -97,4 +97,23 @@ Chạy ứng dụng, cài Chromium bằng `npx playwright install chromium`, r�
 | `API_ORIGIN` | HTTPS origin của backend khi dùng Vercel |
 | `VITE_API_URL` | URL API tùy chỉnh, mặc định dùng `/api` cùng origin |
 
-Render dùng [render.yaml](render.yaml) để build, migrate, seed và import trước khi mở ứng dụng. Nếu dùng Vercel cho frontend, chọn thư mục gốc của repository, đặt `API_ORIGIN` trỏ đến dịch vụ Render và dùng `APP_ORIGIN` là origin của Vercel trên backend.
+### Backend trên Render
+
+[render.yaml](render.yaml) cấu hình Render chạy API. Nếu tạo Web Service trực tiếp trong dashboard, điền các giá trị sau ở **Settings**.
+
+| Mục | Giá trị |
+| --- | --- |
+| Root Directory | Thư mục gốc repo chứa `package.json` và `package-lock.json` |
+| Build Command | `npm ci --include=dev && npm run db:generate` |
+| Start Command | `npm run start -w be` |
+| Health Check Path | `/api/health` |
+
+Trong **Environment**, đặt `NODE_VERSION=22.22.0`, `NODE_ENV=production`, `TRUST_PROXY=1`, `SERVE_FRONTEND=0`, hai URL Neon và `APP_ORIGIN` bằng domain HTTPS của Vercel. Render tự cấp `PORT`.
+
+Blueprint dùng gói Starter và chạy migration, seed và import ở bước pre-deploy. Với Web Service Free, khởi tạo database từ máy local theo mục **Chạy với Neon**. Với database đã có dữ liệu, chạy migration khi có thay đổi schema.
+
+Sau khi lưu cấu hình, chọn **Manual Deploy → Clear build cache & deploy**. Kiểm tra log build có `Generated Prisma Client` và mở `/api/health` trên domain Render để xác nhận kết nối database.
+
+### Frontend trên Vercel
+
+Chọn thư mục gốc của repository để Vercel đọc `vercel.json` và thư mục `api/`. Đặt `API_ORIGIN` bằng domain HTTPS của Render, bỏ phần `/api` ở cuối. Để trống `VITE_API_URL` để frontend dùng proxy `/api` có sẵn.
