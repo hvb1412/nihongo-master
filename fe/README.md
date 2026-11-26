@@ -23,7 +23,7 @@ Mở `http://127.0.0.1:4175`. Vite chuyển `/api` tới `http://127.0.0.1:4000`
 | Build Command | `npm run build` |
 | Output Directory | `dist` |
 
-[vercel.json](vercel.json) cung cấp cấu hình install, build và output. Trong **Settings → Environment Variables**, đặt `API_ORIGIN` bằng domain HTTPS của Render và bỏ phần `/api` ở cuối. Để trống `VITE_API_URL` để trình duyệt dùng proxy `/api` của frontend. Sau khi deploy, mở `/api/health` trên domain Vercel để kiểm tra đường dẫn tới Render. [Cấu hình Root Directory của Vercel](https://vercel.com/docs/builds/configure-a-build#root-directory)
+[vercel.mjs](vercel.mjs) cấu hình build và chuyển tiếp toàn bộ đường dẫn `/api/*` sang Render. Trong **Settings → Environment Variables**, đặt `API_ORIGIN` bằng domain HTTPS của Render và bỏ phần `/api` ở cuối. Để trống `VITE_API_URL` để trình duyệt dùng `/api` cùng domain. Đặt `API_ORIGIN` cho mỗi môi trường Vercel bạn deploy, rồi kiểm tra cả `/api/health` và `/api/catalog/book/VOCABULARY?page=1&limit=8` trên domain Vercel. [Rewrite sang dịch vụ bên ngoài trên Vercel](https://vercel.com/docs/routing/rewrites#rewrites-to-external-origins)
 
 ## Kiểm thử
 
