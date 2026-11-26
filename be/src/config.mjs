@@ -12,8 +12,7 @@ export const settings = {
   origin,
   port: Number(process.env.PORT || 4000),
   mediaBaseUrl: process.env.MEDIA_BASE_URL || '',
-  trustProxy: process.env.TRUST_PROXY === '1',
-  serveFrontend: process.env.SERVE_FRONTEND === '1'
+  trustProxy: process.env.TRUST_PROXY === '1'
 }
 export const db = new PrismaClient({
   datasourceUrl: process.env.DATABASE_URL || 'postgresql://nihongo:nihongo_dev@127.0.0.1:55432/nihongo'

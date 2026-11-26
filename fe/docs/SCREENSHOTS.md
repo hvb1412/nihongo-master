@@ -1,0 +1,3 @@
+# Ảnh giao diện
+
+Ảnh [Kyoto](screenshots/kyoto.webp) của giao diện trước được tạo bằng ImageGen và nén sang WebP. Prompt gốc là “Editorial travel photograph for a Vietnamese Japanese-learning website hero, landscape 4:3. Quiet Kyoto Higashiyama stone lane at blue dawn, traditional dark wooden machiya with a warm amber lantern in the foreground on the right, Yasaka pagoda rising in the middle distance, a few soft cherry branches framing the top. Refined, natural film grain, muted indigo and warm cream, no people, no signs with legible text, no logos, no overlaid text, atmospheric and realistic.”

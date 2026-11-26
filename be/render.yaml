@@ -2,16 +2,15 @@ services:
   - type: web
     name: nihongo-master
     runtime: node
+    rootDir: be
     plan: starter
     buildCommand: npm ci --include=dev && npm run db:generate
     preDeployCommand: npm run db:migrate && npm run db:seed && npm run db:import
-    startCommand: npm run start -w be
+    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
-      - key: SERVE_FRONTEND
-        value: "0"
       - key: NODE_VERSION
         value: "22.22.0"
       - key: TRUST_PROXY

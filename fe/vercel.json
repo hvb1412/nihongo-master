@@ -3,7 +3,7 @@
   "framework": "vite",
   "installCommand": "npm ci --include=dev",
   "buildCommand": "npm run build",
-  "outputDirectory": "fe/dist",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/((?!api(?:/|$)|assets/|audio/|fonts/|.*[.]).*)", "destination": "/index.html" }
   ],

@@ -10,7 +10,7 @@ import { levels } from '../src/utils.mjs'
 import { original, openjlpt, unihan, kanjivg, bunchaway, hanVietWordlist } from './sources.mjs'
 import { readHanViet, vocabularyHanViet } from './han-viet.mjs'
 
-const cache = new URL('../../.cache/data/', import.meta.url)
+const cache = new URL('../.cache/data/', import.meta.url)
 const ref = '0d1d3410bec90bd4098a7c72de820543cb4f707c'
 const pinned = [
   ['openjlpt.sqlite', 'https://raw.githubusercontent.com/evanclan/OpenJLPT/' + ref + '/data/openjlpt.sqlite', '5263ba7a5000a9013baa646b3b80241161028fc561c092d57dc8b864ae92b271'],

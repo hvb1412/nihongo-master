@@ -1,14 +1,18 @@
 {
-  "name": "be",
+  "name": "nihongo-master-be",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
+  "engines": { "node": "^22.19.0" },
   "scripts": {
     "dev": "node --watch src/server.mjs",
     "start": "node src/server.mjs",
+    "dev:db": "node scripts/local-db.mjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "node scripts/seed.mjs",
     "db:import": "node scripts/import-dataset.mjs",
+    "lint": "eslint .",
     "test": "vitest run"
   },
   "dependencies": {
@@ -25,7 +29,10 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
     "embedded-postgres": "^18.0.0-beta.13",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
     "prisma": "6.19.0",
     "supertest": "^7.1.4",
     "vitest": "^3.2.6"

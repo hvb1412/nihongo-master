@@ -9,7 +9,7 @@ import { setTimeout as sleep } from 'node:timers/promises'
 
 const port = Number(process.env.LOCAL_PG_PORT || 55432)
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('LOCAL_PG_PORT chưa hợp lệ.')
-const directory = fileURLToPath(new URL('../../.local/postgres-' + port, import.meta.url))
+const directory = fileURLToPath(new URL('../.local/postgres-' + port, import.meta.url))
 await mkdir(path.dirname(directory), { recursive: true })
 const user = 'nihongo'
 const password = 'nihongo_dev'

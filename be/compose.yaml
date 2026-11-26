@@ -1,3 +1,4 @@
+name: nihongo-master
 services:
   postgres:
     image: postgres:17-alpine

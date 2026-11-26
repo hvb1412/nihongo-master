@@ -3,7 +3,6 @@ import cors from 'cors'
 import helmet from 'helmet'
 import { rateLimit } from 'express-rate-limit'
 import { ZodError } from 'zod'
-import { fileURLToPath } from 'node:url'
 import { db, settings } from './config.mjs'
 import { HttpError, send } from './utils.mjs'
 import { catalogRoutes } from './routes/catalog.mjs'
@@ -35,12 +34,6 @@ app.get('/api/health', async (req, res) => {
   }
 })
 app.use('/api/catalog', catalogRoutes)
-if (settings.serveFrontend) {
-  const frontend = fileURLToPath(new URL('../../fe/dist/', import.meta.url))
-  const index = fileURLToPath(new URL('../../fe/dist/index.html', import.meta.url))
-  app.use(express.static(frontend))
-  app.get(/^(?!\/api(?:\/|$))\/(?:[^.]*?)$/, (req, res) => res.sendFile(index))
-}
 app.use((req, res) => res.status(404).json({ error: { message: 'Không tìm thấy đường dẫn.' } }))
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error)

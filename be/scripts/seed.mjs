@@ -1,4 +1,3 @@
-import { access } from 'node:fs/promises'
 import { db } from '../src/config.mjs'
 import { exampleId, searchable } from '../src/services/content-data.mjs'
 import { curriculum } from './curriculum.mjs'
@@ -71,14 +70,11 @@ async function seedLevel(row) {
 
   const [listenTitle, transcript, listenTranslation] = row.listening
   const audioPath = '/audio/' + tag + '.wav'
-  const hasAudio = await access(new URL('../../fe/public' + audioPath, import.meta.url)).then(() => true, () => false)
-  const listenData = { body: transcript, translation: listenTranslation, minutes: 3, ...(hasAudio ? { audioUrl: audioPath } : {}) }
+  const listenData = { body: transcript, translation: listenTranslation, minutes: 3, audioUrl: audioPath }
   const listenId = await entry(tag + '-listening', { ...metadata, kind: 'LISTENING', title: listenTitle,
     summary: 'Nghe đoạn nói và đối chiếu bản chép lời.', data: listenData })
-  if (hasAudio) {
-    const current = await db.content.findUnique({ where: { id: listenId } })
-    if (!current.data.audioUrl) await db.content.update({ where: { id: listenId }, data: { data: { ...current.data, audioUrl: audioPath } } })
-  }
+  const current = await db.content.findUnique({ where: { id: listenId } })
+  if (!current.data.audioUrl) await db.content.update({ where: { id: listenId }, data: { data: { ...current.data, audioUrl: audioPath } } })
   for (const [index, id] of vocabulary.entries()) await link(listenId, id, 'LISTENING_REFERENCE', index)
 }
 

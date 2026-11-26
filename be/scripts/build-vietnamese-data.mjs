@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { parse } from 'csv-parse/sync'
 import { grammarLabels, grammarTerms, partsOfSpeech } from './vietnamese-labels.mjs'
 
-const root = new URL('../../', import.meta.url)
+const root = new URL('../', import.meta.url)
 const file = name => fileURLToPath(new URL(name, root))
 const dictionaryFile = file('.cache/data/bunchaway.csv')
 const dictionarySha256 = '8b25e5e841c47c61bd77c8c6dc959ac325330a484500387677cec04a34d2377c'
@@ -174,7 +174,7 @@ if (process.argv.includes('--translate')) {
   await Promise.all(Object.entries(modelFiles).map(([name, checksum]) => verify(file(modelDirectory + '/' + name), checksum)))
   writeFileSync(translationInput, JSON.stringify([...tasks]))
   execFileSync(process.env.NIHONGO_PYTHON || 'python', [
-    file('be/scripts/translate-vietnamese.py'), file(modelDirectory), translationInput, translationOutput
+    file('scripts/translate-vietnamese.py'), file(modelDirectory), translationInput, translationOutput
   ], { stdio: 'inherit' })
 }
 
@@ -228,7 +228,7 @@ for (const row of [...words, ...grammar]) for (const item of array(row.examples)
   if (exact(item.en)) examples[exact(item.en)] = exampleEdits[exact(item.en)] || translatedText(item.en)
 }
 const ordered = value => Object.fromEntries(Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0))
-const output = file('be/data/vietnamese-dictionary.json')
+const output = file('data/vietnamese-dictionary.json')
 const jsonLines = value => Object.entries(ordered(value)).map(([key, item]) => JSON.stringify(key) + ':' + JSON.stringify(item)).join(',\n')
 writeFileSync(output, '{"entries": {\n' + jsonLines(entries) + '\n}, "examples": {\n' + jsonLines(examples) + '\n}}\n')
 console.log({ entries: Object.keys(entries).length, examples: Object.keys(examples).length, modelInputs: tasks.size })
